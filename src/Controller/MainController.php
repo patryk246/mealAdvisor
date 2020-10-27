@@ -3,14 +3,14 @@
 
 namespace App\Controller;
 
-
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Security\Core\Security;
 
 
-class MainController
+class MainController extends AbstractController
 {
     private $security;
 
@@ -23,11 +23,10 @@ class MainController
     * @Route("/", name="app_homepage")
     * @IsGranted("ROLE_USER")
     */
-    public function helloWorld(){
+    public function homePage(): Response
+    {
         /** @var \src\Entity\User $user */
         $user = $this->security->getUser();
-        return new Response(
-        '<html><body>Hello World</body></html>'
-        );
+        return $this->render('authenticated/home.html.twig', ['email' => $user->getEmail()]);
     }
 }
