@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -50,6 +52,16 @@ class User implements UserInterface
      * @ORM\Column(type="smallint")
      */
     private $isActive=0;
+
+    /**
+     * @ORM\OneToMany(targetEntity=UserProduct::class, mappedBy="userId", orphanRemoval=true)
+     */
+    private $userProducts;
+
+    public function __construct()
+    {
+        $this->userProducts = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -164,4 +176,35 @@ class User implements UserInterface
 
         return $this;
     }
+
+    /**
+     * @return Collection|UserProduct[]
+     */
+    public function getUserProducts(): Collection
+    {
+        return $this->userProducts;
+    }
+
+    public function addUserProduct(UserProduct $userProduct): self
+    {
+        if (!$this->userProducts->contains($userProduct)) {
+            $this->userProducts[] = $userProduct;
+            $userProduct->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserProduct(UserProduct $userProduct): self
+    {
+        if ($this->userProducts->removeElement($userProduct)) {
+            // set the owning side to null (unless already changed)
+            if ($userProduct->getUserId() === $this) {
+                $userProduct->setUserId(null);
+            }
+        }
+
+        return $this;
+    }
+
 }
