@@ -26,7 +26,7 @@ class UserProduct
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="userProducts")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $user_id;
+    private $userId;
 
     /**
      * @ORM\ManyToOne(targetEntity=Product::class)
@@ -58,12 +58,12 @@ class UserProduct
 
     public function getUserId(): ?User
     {
-        return $this->user_id;
+        return $this->userId;
     }
 
-    public function setUserId(?User $user_id): self
+    public function setUserId(?User $userId): self
     {
-        $this->user_id = $user_id;
+        $this->userId = $userId;
 
         return $this;
     }

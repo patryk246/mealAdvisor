@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Home{% endblock %}
+
+{% block body %}
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #82f954;">
+        <a class="navbar-brand" href="#">Meal Advisor</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown" >
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/showProducts">Your Products</a>
+                </li>
+            </ul>
+            {% if app.user %}
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
+                            {{ email }}
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="#">Your Profile</a>
+                            <a class="dropdown-item" href="#">Settings</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="/logout">Sign Out</a>
+                        </div>
+                    </li>
+                </ul>
+            {% endif %}
+        </div>
+    </nav>
+
+    <br>
+    <h2 class="page-header">Your Products</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Product Name</th>
+                <th>Amount Of Product</th>
+                <th>Unit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for userProduct in userProducts %}
+                <tr>
+                    <th scope="row">{{loop.index}}</th>
+                    <td>{{ userProduct.getProductId.getName }}</td>
+                    <td>{{ userProduct.getAmount }}</td>
+                    <td>{{ userProduct.getUnitId.getShortName }}</td>
+                    <td><a href="/editProduct/{{ userProduct.getId }}" class="btn-default">Edit</a></td>
+                    <td><a href="/deleteProduct/{{ userProduct.getId }}" class="btn-default">Delete</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <a href="/addProduct">add Product</a>
+{% endblock %}

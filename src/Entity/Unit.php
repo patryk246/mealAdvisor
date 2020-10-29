@@ -20,12 +20,12 @@ class Unit
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $short_name;
+    private $shortName;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $full_name;
+    private $fullName;
 
     public function getId(): ?int
     {
@@ -34,24 +34,24 @@ class Unit
 
     public function getShortName(): ?string
     {
-        return $this->short_name;
+        return $this->shortName;
     }
 
-    public function setShortName(string $short_name): self
+    public function setShortName(string $shortName): self
     {
-        $this->short_name = $short_name;
+        $this->shortName = $shortName;
 
         return $this;
     }
 
     public function getFullName(): ?string
     {
-        return $this->full_name;
+        return $this->fullName;
     }
 
-    public function setFullName(string $full_name): self
+    public function setFullName(string $fullName): self
     {
-        $this->full_name = $full_name;
+        $this->full_name = $fullName;
 
         return $this;
     }
