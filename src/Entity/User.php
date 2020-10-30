@@ -6,6 +6,7 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -54,7 +55,7 @@ class User implements UserInterface
     private $isActive=0;
 
     /**
-     * @ORM\OneToMany(targetEntity=UserProduct::class, mappedBy="userId", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=UserProduct::class, mappedBy="userId", orphanRemoval=true, cascade={"persist"})
      */
     private $userProducts;
 
@@ -188,6 +189,13 @@ class User implements UserInterface
     public function addUserProduct(UserProduct $userProduct): self
     {
         if (!$this->userProducts->contains($userProduct)) {
+            foreach($this->userProducts as $userProductTemp)
+            {
+                if($userProductTemp->getProductId()->getName() == $userProduct->getProductId()->getName())
+                {
+                    throw new Exception('You already have this product!');
+                }
+            }
             $this->userProducts[] = $userProduct;
             $userProduct->setUserId($this);
         }
@@ -202,6 +210,9 @@ class User implements UserInterface
             if ($userProduct->getUserId() === $this) {
                 $userProduct->setUserId(null);
             }
+        }
+        else{
+            throw new Exception('You can not delete product which you do not have!');
         }
 
         return $this;

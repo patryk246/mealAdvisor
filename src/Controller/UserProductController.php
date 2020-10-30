@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Entity\UserProduct;
 use App\Form\UserProductFormType;
-use PHPUnit\Runner\Exception;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Security;
@@ -34,7 +34,8 @@ class UserProductController extends AbstractController
 
         return $this->render('authenticated/showProducts.html.twig', [
             'email' => $this->getAuthenticatedUser()->getEmail(),
-            'userProducts' => $userProducts
+            'userProducts' => $userProducts,
+            'errorMessage' => ''
         ]);
     }
 
@@ -45,16 +46,33 @@ class UserProductController extends AbstractController
     public function addProductToUser(Request $request)
     {
         $userProduct = new UserProduct();
-        $user1 = $this->security->getUser();
         $form = $this->createForm(UserProductFormType::class, $userProduct);
 
         $form -> handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $userProduct = $form->getData();
 
-            $userProduct ->setUserId($user1);
+            /*
+             * $userProduct ->setUserId($this->getAuthenticatedUser());
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($userProduct);
+            $entityManager->flush();
+            */
+
+            $user = $this->getAuthenticatedUser();
+            try {
+                $user->addUserProduct($userProduct);
+            }
+            catch (Exception $exception){
+                return $this->render('authenticated/addProduct.html.twig', [
+                    'form' => $form->createView(),
+                    'email' => $this->getAuthenticatedUser()->getEmail(),
+                    'errorMessage' => $exception->getMessage(),
+                ]);
+            }
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($user);
             $entityManager->flush();
 
             return $this->redirectToRoute('app_showProducts');
@@ -63,7 +81,7 @@ class UserProductController extends AbstractController
         return $this->render('authenticated/addProduct.html.twig', [
             'form' => $form->createView(),
             'email' => $this->getAuthenticatedUser()->getEmail(),
-            //'user' => $userProduct->getUserId()-,
+            'errorMessage' => '',
         ]);
     }
 
@@ -93,6 +111,7 @@ class UserProductController extends AbstractController
         return $this->render('authenticated/addProduct.html.twig', [
             'form' => $form->createView(),
             'email' => $this->getAuthenticatedUser()->getEmail(),
+            'errorMessage' => '',
         ]);
     }
 
@@ -103,15 +122,32 @@ class UserProductController extends AbstractController
     public function deleteProduct($userProductId)
     {
         $entityManager = $this->getDoctrine()->getManager();
-        $userProduct = $entityManager->getRepository(UserProduct::class)->find($userProductId);
+        /*$userProduct = $entityManager->getRepository(UserProduct::class)->find($userProductId);
         if(!$userProduct)
         {
             throw $this->createNotFoundException('There is no such product');
         }
         $entityManager->remove($userProduct);
-        $entityManager->flush();
+        $entityManager->flush();*/
 
-        return $this->redirectToRoute('app_showProducts');
+        $entityManager = $this->getDoctrine()->getManager();
+        $userProduct = $entityManager->getRepository(UserProduct::class)->find($userProductId);
+        if($userProduct)
+        {
+            try {
+                $this->getAuthenticatedUser()->removeUserProduct($userProduct);
+                $entityManager->flush();
+            } catch (Exception $exception) {
+                return $this->redirectToRoute('app_showProducts', [
+                    'errorMessage' => $exception->getMessage(),
+                ]);
+            }
+            return $this->redirectToRoute('app_showProducts');
+        }
+        return $this->redirectToRoute('app_showProducts',
+            [
+                'errorMessage' => 'You can not delete product which you do not have!'
+            ]);
     }
 
     private function getAuthenticatedUser()
