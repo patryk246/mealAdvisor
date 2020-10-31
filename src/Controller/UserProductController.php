@@ -23,14 +23,14 @@ class UserProductController extends AbstractController
     }
 
     /**
-     * @Route("/showProducts", name="app_showProducts")
+     * @Route("/products", name="app_products")
      * @IsGranted("ROLE_USER")
      */
     public function showUserProducts()
     {
         $user = $this->getAuthenticatedUser();
         $repository = $this->getDoctrine()->getRepository(UserProduct::class);
-        $userProducts = $repository->findBy(['userId' => $user->getId()]);
+        $userProducts = $repository->findBy(['user' => $user->getId()]);
 
         return $this->render('authenticated/showProducts.html.twig', [
             'email' => $this->getAuthenticatedUser()->getEmail(),
@@ -40,7 +40,7 @@ class UserProductController extends AbstractController
     }
 
     /**
-     * @Route("/addProduct", name="app_addProduct")
+     * @Route("/products/add", name="app_addProduct")
      * @IsGranted("ROLE_USER")
      */
     public function addProductToUser(Request $request)
@@ -75,7 +75,7 @@ class UserProductController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_showProducts');
+            return $this->redirectToRoute('app_products');
         }
 
         return $this->render('authenticated/addProduct.html.twig', [
@@ -86,7 +86,7 @@ class UserProductController extends AbstractController
     }
 
     /**
-     * @Route("/editProduct/{userProductId}", name="app_editProduct")
+     * @Route("/products/edit/{userProductId}", name="app_editProduct")
      * @IsGranted("ROLE_USER")
      */
     public function editAmountOfProduct(Request $request, $userProductId)
@@ -105,7 +105,7 @@ class UserProductController extends AbstractController
             $userProduct = $form->getData();
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_showProducts');
+            return $this->redirectToRoute('app_products');
         }
 
         return $this->render('authenticated/addProduct.html.twig', [
@@ -116,20 +116,11 @@ class UserProductController extends AbstractController
     }
 
     /**
-     * @Route("/deleteProduct/{userProductId}", name="app_deleteProduct")
+     * @Route("/products/delete/{userProductId}", name="app_deleteProduct")
      * @IsGranted("ROLE_USER")
      */
     public function deleteProduct($userProductId)
     {
-        $entityManager = $this->getDoctrine()->getManager();
-        /*$userProduct = $entityManager->getRepository(UserProduct::class)->find($userProductId);
-        if(!$userProduct)
-        {
-            throw $this->createNotFoundException('There is no such product');
-        }
-        $entityManager->remove($userProduct);
-        $entityManager->flush();*/
-
         $entityManager = $this->getDoctrine()->getManager();
         $userProduct = $entityManager->getRepository(UserProduct::class)->find($userProductId);
         if($userProduct)
@@ -138,13 +129,13 @@ class UserProductController extends AbstractController
                 $this->getAuthenticatedUser()->removeUserProduct($userProduct);
                 $entityManager->flush();
             } catch (Exception $exception) {
-                return $this->redirectToRoute('app_showProducts', [
+                return $this->redirectToRoute('app_products', [
                     'errorMessage' => $exception->getMessage(),
                 ]);
             }
-            return $this->redirectToRoute('app_showProducts');
+            return $this->redirectToRoute('app_products');
         }
-        return $this->redirectToRoute('app_showProducts',
+        return $this->redirectToRoute('app_products',
             [
                 'errorMessage' => 'You can not delete product which you do not have!'
             ]);

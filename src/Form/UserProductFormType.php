@@ -34,7 +34,7 @@ class UserProductFormType extends AbstractType
             // If no data is passed to the form, the data is "null".
             // This should be considered a new "Product"
             if (!$userProduct || null === $userProduct->getId()) {
-                $form->add('productId', EntityType::class, [
+                $form->add('product', EntityType::class, [
                     'class' => Product::class,
                     'choice_label' => 'name',
                     'constraints' => [
@@ -45,11 +45,11 @@ class UserProductFormType extends AbstractType
                 ]);
             }
         })
-            ->add('productId', HiddenType::class, [
+            ->add('product', HiddenType::class, [
                 'mapped' => false,
             ])
             // other, constant fields of the form
-            ->add('unitId', EntityType::class, [
+            ->add('unit', EntityType::class, [
                 'class' => Unit::class,
                 'choice_label' => 'shortName',
                 'constraints' => [

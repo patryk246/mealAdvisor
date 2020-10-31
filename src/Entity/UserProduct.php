@@ -26,18 +26,18 @@ class UserProduct
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="userProducts")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $userId;
+    private $user;
 
     /**
      * @ORM\ManyToOne(targetEntity=Product::class)
      * @ORM\JoinColumn(nullable=false)
      */
-    private $productId;
+    private $product;
 
     /**
      * @ORM\ManyToOne(targetEntity=Unit::class)
      */
-    private $unitId;
+    private $unit;
 
     public function getId(): ?int
     {
@@ -56,38 +56,38 @@ class UserProduct
         return $this;
     }
 
-    public function getUserId(): ?User
+    public function getUser(): ?User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(?User $userId): self
+    public function setUser(?User $user): self
     {
-        $this->userId = $userId;
+        $this->user = $user;
 
         return $this;
     }
 
-    public function getProductId(): ?Product
+    public function getProduct(): ?Product
     {
-        return $this->productId;
+        return $this->product;
     }
 
-    public function setProductId(?Product $productId): self
+    public function setProduct(?Product $product): self
     {
-        $this->productId = $productId;
+        $this->product = $product;
 
         return $this;
     }
 
-    public function getUnitId(): ?Unit
+    public function getUnit(): ?Unit
     {
-        return $this->unitId;
+        return $this->unit;
     }
 
-    public function setUnitId(?Unit $unitId): self
+    public function setUnit(?Unit $unit): self
     {
-        $this->unitId = $unitId;
+        $this->unit = $unit;
 
         return $this;
     }

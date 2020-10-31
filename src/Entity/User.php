@@ -55,7 +55,7 @@ class User implements UserInterface
     private $isActive=0;
 
     /**
-     * @ORM\OneToMany(targetEntity=UserProduct::class, mappedBy="userId", orphanRemoval=true, cascade={"persist"})
+     * @ORM\OneToMany(targetEntity=UserProduct::class, mappedBy="user", orphanRemoval=true, cascade={"persist"})
      */
     private $userProducts;
 
@@ -191,13 +191,13 @@ class User implements UserInterface
         if (!$this->userProducts->contains($userProduct)) {
             foreach($this->userProducts as $userProductTemp)
             {
-                if($userProductTemp->getProductId()->getName() == $userProduct->getProductId()->getName())
+                if($userProductTemp->getProduct()->getName() == $userProduct->getProduct()->getName())
                 {
                     throw new Exception('You already have this product!');
                 }
             }
             $this->userProducts[] = $userProduct;
-            $userProduct->setUserId($this);
+            $userProduct->setUser($this);
         }
 
         return $this;
@@ -207,8 +207,8 @@ class User implements UserInterface
     {
         if ($this->userProducts->removeElement($userProduct)) {
             // set the owning side to null (unless already changed)
-            if ($userProduct->getUserId() === $this) {
-                $userProduct->setUserId(null);
+            if ($userProduct->getUser() === $this) {
+                $userProduct->setUser(null);
             }
         }
         else{
