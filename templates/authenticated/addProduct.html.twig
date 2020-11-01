@@ -6,10 +6,34 @@
 
     {% include 'navbar/navbar.html.twig' %}
 
-    {{ form(form) }}
+    <h4>Add new product to your collection</h4>
+    {{ form_start(form) }}
+        <table>
+            <thead></thead>
+            <tbody>
+                <tr>
+                    <td>{{ form_label(form.product) }}</td>
+                    <td>{{ form_widget(form.product) }}</td>
+                    <td>{{ form_errors(form.product) }}</td>
+                </tr>
+                <tr>
+                    <td>{{ form_label(form.unit) }}</td>
+                    <td>{{ form_widget(form.unit) }}</td>
+                    <td>{{ form_errors(form.unit) }}</td>
+                </tr>
+                <tr>
+                    <td>{{ form_label(form.amount) }}</td>
+                    <td>{{ form_widget(form.amount) }}</td>
+                    <td>{{ form_errors(form.amount) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {{ form_end(form) }}
 
     <br>
-    <br>
-
     {{ errorMessage }}
+    <br>
+    <h4>Can't find product on a list? Create a new one!</h4>
+    <a href="/products/new" class="btn btn-success">New Product</a>
+
 {% endblock %}

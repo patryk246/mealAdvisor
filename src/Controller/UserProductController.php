@@ -51,14 +51,6 @@ class UserProductController extends AbstractController
         $form -> handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $userProduct = $form->getData();
-
-            /*
-             * $userProduct ->setUserId($this->getAuthenticatedUser());
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($userProduct);
-            $entityManager->flush();
-            */
-
             $user = $this->getAuthenticatedUser();
             try {
                 $user->addUserProduct($userProduct);

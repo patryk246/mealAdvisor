@@ -23,14 +23,14 @@
                     <td>{{ userProduct.getProduct.getName }}</td>
                     <td>{{ userProduct.getAmount }}</td>
                     <td>{{ userProduct.getUnit.getShortName }}</td>
-                    <td><a href="/products/edit/{{ userProduct.getId }}" class="btn-default">Edit</a></td>
-                    <td><a href="/products/delete/{{ userProduct.getId }}" class="btn-default">Delete</a></td>
+                    <td><a href="/products/edit/{{ userProduct.getId }}" class="btn btn-warning">Edit</a></td>
+                    <td><a href="/products/delete/{{ userProduct.getId }}" class="btn btn-danger">Delete</a></td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
     <br>
-    <a href="/products/add">add Product</a>
+    <a href="/products/add" class="btn btn-success">Add Product</a>
     <br><br>
     {{ errorMessage }}
 {% endblock %}
