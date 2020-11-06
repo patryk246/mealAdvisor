@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Home{% endblock %}
+
+{% block body %}
+
+    {% include 'navbar/navbar.html.twig' %}
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Receipe Title</th>
+                <th>Image</th>
+                <th>Matching Ingredients</th>
+                <th>Missed Ingredients</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for receipe in response %}
+                <tr>
+                    <td>{{ receipe.title }}</td>
+                    <td><img src="{{ receipe.image }}"></td>
+                    <td>{{ receipe.usedIngredientCount }}</td>
+                    <td>{{ receipe.missedIngredientCount }}</td>
+                    <td><a href="/receipes/show/{{ receipe.id }}" class="btn btn-success">View</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

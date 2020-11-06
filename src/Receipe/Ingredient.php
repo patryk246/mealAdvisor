@@ -78,7 +78,7 @@ class Ingredient
         $this->receipe = $receipe;
     }
 
-    // if amount of ingredient is given as non-metric (tsp, tsps, Tbsp, Tbsps, pinch, large, small, medium, servings, serving, small head, head)
+    // if amount of ingredient is given as non-metric (tsp, tsps, Tbsp, Tbsps, oz, pinch, large, small, medium, servings, serving, small head, head)
     public function recalculateAmountAndUnit()
     {
         if($this->unit == 'g' || $this->unit == 'kg' || $this->unit == 'ml' || $this->unit == 'l' || $this->unit == '')
@@ -102,6 +102,11 @@ class Ingredient
                 }
                 else
                 {
+                    if($this->unit == 'oz')
+                    {
+                        $this->recalculatedUnit = 'g';
+                        $this->recalculatedAmount = $this->amount * 28.35;
+                    }
                     $this->recalculatedUnit = '';
                     $this->recalculatedAmount = $this->amount;
                 }

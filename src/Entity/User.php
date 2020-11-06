@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints\Count;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -56,6 +57,7 @@ class User implements UserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=UserProduct::class, mappedBy="user", orphanRemoval=true, cascade={"persist"})
+     * @Count(min = 1, minMessage = "At least one item must be selected")
      */
     private $userProducts;
 
@@ -183,15 +185,19 @@ class User implements UserInterface
      */
     public function getUserProducts(): Collection
     {
+        // for some reasons without any action, method returns empty collection
+        // on this place dump($this->userProducts) shows empty array
+        $this->userProducts->count();
+        // on this place dump($this->userProducts) shows actual collection
         return $this->userProducts;
     }
 
     public function addUserProduct(UserProduct $userProduct): self
     {
         if (!$this->userProducts->contains($userProduct)) {
-            foreach($this->userProducts as $userProductTemp)
+            foreach ($this->userProducts as $userProductTemp)
             {
-                if($userProductTemp->getProduct()->getName() == $userProduct->getProduct()->getName())
+                if($userProduct->getProduct()->getName() == $userProductTemp->getProduct()->getName())
                 {
                     throw new Exception('You already have this product!');
                 }
@@ -199,7 +205,6 @@ class User implements UserInterface
             $this->userProducts[] = $userProduct;
             $userProduct->setUser($this);
         }
-
         return $this;
     }
 

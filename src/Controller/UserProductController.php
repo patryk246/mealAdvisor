@@ -4,8 +4,11 @@
 namespace App\Controller;
 
 
+use App\Entity\Product;
 use App\Entity\UserProduct;
+use App\Form\SelectProductsFormType;
 use App\Form\UserProductFormType;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,9 +32,10 @@ class UserProductController extends AbstractController
     public function showUserProducts()
     {
         $user = $this->getAuthenticatedUser();
-        $repository = $this->getDoctrine()->getRepository(UserProduct::class);
-        $userProducts = $repository->findBy(['user' => $user->getId()]);
-
+        //$repository = $this->getDoctrine()->getRepository(UserProduct::class);
+        //$userProducts = $repository->findBy(['user' => $user->getId()]);
+        $userProducts = $user->getUserProducts();
+        dump($userProducts);
         return $this->render('authenticated/showProducts.html.twig', [
             'email' => $this->getAuthenticatedUser()->getEmail(),
             'userProducts' => $userProducts,
@@ -67,7 +71,7 @@ class UserProductController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_products');
+            //return $this->redirectToRoute('app_products');
         }
 
         return $this->render('authenticated/addProduct.html.twig', [
@@ -131,6 +135,41 @@ class UserProductController extends AbstractController
             [
                 'errorMessage' => 'You can not delete product which you do not have!'
             ]);
+    }
+
+    /**
+     * @Route("/products/select", name="app_selectProducts")
+     * @IsGranted("ROLE_USER")
+     */
+    public function chooseUserProductsForReceipes(Request $request)
+    {
+        $user = $this->getAuthenticatedUser();
+        $product = new Product();
+        $userProducts = $user->getUserProducts();
+        $products = new ArrayCollection();
+        foreach ($userProducts as $userProduct)
+        {
+            $products->add($userProduct->getProduct());
+        }
+
+        $form = $this->createForm(SelectProductsFormType::class, $product, ['products' => $products]);
+
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid())
+        {
+            //dump($form['name']->getData());
+            $productNames = '';
+            foreach ($form['name']->getData() as $selectedProduct)
+            {
+                $productNames .= $selectedProduct->getName() . ',';
+            }
+            $productNames = substr($productNames, 0, -1);
+            return $this->redirectToRoute('app_findReceipes', ['productNames' => $productNames]);
+        }
+        return $this->render('product/selectProducts.html.twig', [
+            'email' => $this->getAuthenticatedUser()->getEmail(),
+            'form' => $form->createView(),
+        ]);
     }
 
     private function getAuthenticatedUser()

@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Product;
 use App\Entity\Unit;
 use App\Entity\UserProduct;
+use App\Form\SelectProductsFormType;
 use App\Form\ProductFormType;
 use App\Form\UserProductFormType;
 use App\Repository\ProductRepository;

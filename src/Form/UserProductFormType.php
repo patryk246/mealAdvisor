@@ -37,11 +37,6 @@ class UserProductFormType extends AbstractType
                 $form->add('product', EntityType::class, [
                     'class' => Product::class,
                     'choice_label' => 'name',
-                    'constraints' => [
-                        new NotBlank(
-                            ['message' => 'Please select a product from list']
-                        )
-                    ],
                 ]);
             }
         })
@@ -52,20 +47,8 @@ class UserProductFormType extends AbstractType
             ->add('unit', EntityType::class, [
                 'class' => Unit::class,
                 'choice_label' => 'shortName',
-                'constraints' => [
-                    new NotBlank(
-                        ['message' => 'Please select product unit from list']
-                    )
-                ],
                 ])
-            ->add('amount', NumberType::class,[
-                'constraints' => [
-                    new NotBlank(
-                        ['message' => 'Please select amount of your product']
-                    ),
-                    
-                ],
-            ])
+            ->add('amount', NumberType::class)
             ->add('save', SubmitType::class)
             ;
     }

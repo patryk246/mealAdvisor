@@ -19,10 +19,10 @@ class UserProductRepository extends ServiceEntityRepository
         parent::__construct($registry, UserProduct::class);
     }
 
-    /**
-    * @return UserProduct[] Returns an array of UserProduct objects
-    */
-
+   // /**
+   // * @return UserProduct[] Returns an array of UserProduct objects
+   // */
+/*
     public function findByUserId($userId)
     {
         return $this->createQueryBuilder('u')
@@ -34,7 +34,7 @@ class UserProductRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
-
+*/
 
     /*
     public function findOneBySomeField($value): ?UserProduct
