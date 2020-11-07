@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 use App\ApiClient\SpoonacularApiClient;
+use App\Receipe\Receipe;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Routing\Annotation\Route;
@@ -11,15 +12,18 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class ReceipeController extends AbstractController
 {
 
     private $security;
+    private $session;
 
-    public function __construct(Security $security)
+    public function __construct(Security $security, SessionInterface $session)
     {
         $this->security = $security;
+        $this->session = $session;
     }
 
 
@@ -38,6 +42,33 @@ class ReceipeController extends AbstractController
         ]);
     }
 
+    /**
+     * @Route("/receipes/show/{receipeId}", name="app_showReceipe")
+     * @IsGranted("ROLE_USER")
+     */
+    public function showReceipe(Request $request, $receipeId)
+    {
+        $apiClient = new SpoonacularApiClient();
+        $receipeInformation = $apiClient->getReceipeInformation($receipeId);
+        dump($receipeInformation);
+        $receipe = new Receipe($receipeInformation);
+        dump($receipe);
+        $this->session->set('receipe', $receipe);
+        return $this->render('receipe/showReceipe.html.twig', [
+            'receipe' => $receipe,
+            'email' => $this->getAuthenticatedUser()->getEmail()
+        ]);
+    }
+
+    /**
+     * @Route("/receipes/{receipeId}/steps", name="app_receipeSteps")
+     * @IsGranted("ROLE_USER")
+     */
+    public function showReceipeSteps($receipeId)
+    {
+        $receipe = $this->session->get('receipe');
+        dump($receipe);
+    }
 
     private function getAuthenticatedUser()
     {

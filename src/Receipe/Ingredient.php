@@ -4,15 +4,45 @@
 namespace App\Receipe;
 
 
+use App\ApiClient\SpoonacularApiClient;
+
 class Ingredient
 {
 
+    private $id;
     private $name;
     private $amount;
     private $unit;
     private $receipe;
     private $recalculatedUnit;
     private $recalculatedAmount;
+    // array useful with recalculating unit - if ingredient is liquid then recalculatedUnit will be ml, etc.
+    private $ingredientConsistency = ['liquid' => 'ml', 'solid' => 'g'];
+
+    public function __construct($extendedIngredient)
+    {
+        $this->setId($extendedIngredient['id']);
+        $this->setName($extendedIngredient['name']);
+        $this->setAmount($extendedIngredient['measures']['metric']['amount']);
+        $this->setUnit($extendedIngredient['measures']['metric']['unitShort']);
+        $this->recalculateAmountAndUnit($extendedIngredient['consistency']);
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId($id): void
+    {
+        $this->id = $id;
+    }
 
     /**
      * @return string
@@ -79,38 +109,20 @@ class Ingredient
     }
 
     // if amount of ingredient is given as non-metric (tsp, tsps, Tbsp, Tbsps, oz, pinch, large, small, medium, servings, serving, small head, head)
-    public function recalculateAmountAndUnit()
+    public function recalculateAmountAndUnit($consistency): void
     {
         if($this->unit == 'g' || $this->unit == 'kg' || $this->unit == 'ml' || $this->unit == 'l' || $this->unit == '')
         {
             $this->recalculatedAmount = $this->amount;
-            $this->recalculatedUnit = $this->recalculatedUnit;
+            $this->recalculatedUnit = $this->unit;
         }
         else
         {
-            if($this->unit == 'tsp' || $this->unit = 'tsps')
-            {
-                $this->recalculatedUnit = 'g';
-                $this->recalculatedAmount = $this->amount * 5;
-            }
-            else
-            {
-                if($this->unit == 'Tbsp' || $this->unit == 'Tbsps')
-                {
-                    $this->recalculatedUnit = 'g';
-                    $this->recalculatedAmount = $this->amount * 21.25;
-                }
-                else
-                {
-                    if($this->unit == 'oz')
-                    {
-                        $this->recalculatedUnit = 'g';
-                        $this->recalculatedAmount = $this->amount * 28.35;
-                    }
-                    $this->recalculatedUnit = '';
-                    $this->recalculatedAmount = $this->amount;
-                }
-            }
+            $apiClient = new SpoonacularApiClient();
+            $targetUnit = $this->ingredientConsistency[$consistency];
+            $convertedIngredient = $apiClient->convertAmounts($this->getName(), $this->getAmount(), $this->getUnit(), $targetUnit);
+            $this->recalculatedAmount = $convertedIngredient['targetAmount'];
+            $this->recalculatedUnit = $convertedIngredient['targetUnit'];
         }
     }
 

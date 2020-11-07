@@ -35,4 +35,43 @@ class SpoonacularApiClient
         return $response->toArray();
     }
 
+    public function getReceipeInformation($receipeId)
+    {
+        $url = 'https://api.spoonacular.com/recipes/' . $receipeId . '/information';
+        $response = $this->client->request(
+            'GET',
+            $url,
+            [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+                'query' => [
+                    'apiKey' => self::API_KEY
+                ]
+            ]
+        );
+        return $response->toArray();
+    }
+
+    public function convertAmounts($ingredientName, $sourceAmount, $sourceUnit, $targetUnit)
+    {
+        $response = $this->client->request(
+            'GET',
+            'https://api.spoonacular.com/recipes/convert',
+            [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+                'query' => [
+                    'apiKey' => self::API_KEY,
+                    'ingredientName' => $ingredientName,
+                    'sourceAmount' => $sourceAmount,
+                    'sourceUnit' => $sourceUnit,
+                    'targetUnit' => $targetUnit,
+                ]
+            ]
+        );
+        return $response->toArray();
+    }
+
 }

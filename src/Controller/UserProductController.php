@@ -66,14 +66,11 @@ class UserProductController extends AbstractController
                     'errorMessage' => $exception->getMessage(),
                 ]);
             }
-
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
-
-            //return $this->redirectToRoute('app_products');
+            return $this->redirectToRoute('app_products');
         }
-
         return $this->render('authenticated/addProduct.html.twig', [
             'form' => $form->createView(),
             'email' => $this->getAuthenticatedUser()->getEmail(),

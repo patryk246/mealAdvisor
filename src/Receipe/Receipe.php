@@ -23,9 +23,27 @@ class Receipe
     private $ingredients;
     private $summary;
 
-    public function __construct()
+    public function __construct($receipeInformationArray)
     {
         $this->ingredients = new ArrayCollection();
+
+        $this->setId($receipeInformationArray['id']);
+        $this->setTitle($receipeInformationArray['title']);
+        $this->setImage($receipeInformationArray['image']);
+        $this->setServings($receipeInformationArray['servings']);
+        $this->setReadyInMinutes($receipeInformationArray['readyInMinutes']);
+        $this->setSourceUrl($receipeInformationArray['sourceUrl']);
+        $this->setHealthScore($receipeInformationArray['healthScore']);
+
+        $instructions = $receipeInformationArray['analyzedInstructions'][0]['steps'];
+        $this->setAnalyzedInstructions($instructions);
+
+        $extendedIngredients = $receipeInformationArray['extendedIngredients'];
+        foreach ($extendedIngredients as $extendedIngredient)
+        {
+            $ingredient = new Ingredient($extendedIngredient);
+            $this->addIngredient($ingredient);
+        }
     }
 
     /**
@@ -148,11 +166,15 @@ class Receipe
         return $this->analyzedInstructions;
     }
 
-    public function addAnalyzedInstruction(int $number, string $step): self
+    public function setAnalyzedInstructions($analyzedInstructionsArray)
     {
-        if(!$this->analyzedInstructions->containsKey($number))
+        if($analyzedInstructionsArray)
         {
-            $this->analyzedInstructions[$number] = $step;
+            foreach ($analyzedInstructionsArray as $analyzedInstruction)
+            {
+                $number = $analyzedInstruction['number'];
+                $this->analyzedInstructions[$number] = $analyzedInstruction['step'];
+            }
         }
         return $this;
     }
@@ -166,12 +188,12 @@ class Receipe
     }
 
 
-    public function addIngredient(Ingredient $ingredient): self
+    public function addIngredient(Ingredient $ingredient): void
     {
         if(!$this->ingredients->contains($ingredient))
         {
             $this->ingredients[] = $ingredient;
-            $ingredient.setReceipe($this);
+            $ingredient->setReceipe($this);
         }
     }
 
