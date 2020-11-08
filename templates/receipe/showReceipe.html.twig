@@ -6,6 +6,35 @@
 
     {% include 'navbar/navbar.html.twig' %}
 
-    <a href="/receipes/{{ receipe.id }}/steps" class="btn btn-success">Steps</a>
+    <div class="container-fluid">
+        <h3>{{ receipe.getTitle() }}</h3>
+        <div class="row">
+            <div class="col-5">
+                <img src="{{ receipe.getImage() }}">
+            </div>
+            <div class="col-6">
+                <h5>Ingredients: </h5>
+                <ul>
+                    {% for ingredient in receipe.getIngredients() %}
+                        <li><h5>{{ ingredient.getName() }}:   {{ ingredient.getAmount() }} {{ ingredient.getUnit() }}</h5></li>
+                    {% endfor %}
+                </ul>
+                <br>
+                <h5>Servings: {{ receipe.getServings() }}</h5>
+                <h5>Ready in minutes: {{ receipe.getReadyInMinutes() }}</h5>
+                <h5>Health score: {{ receipe.getHealthScore() }}</h5>
+                <h6>Source URL: <a href= "{{ receipe.getSourceUrl() }}">{{ receipe.getSourceUrl() }}</a></h6>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <br>
+                <h5>Summary:</h5>
+                <h6>{{ receipe.getSummary() | raw }}</h6>
+                <br>
+                <a href="/receipes/{{ receipe.id }}/instructions" class="btn btn-success">See instructions</a>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}

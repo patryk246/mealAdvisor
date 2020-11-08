@@ -26,10 +26,14 @@ class Receipe
     public function __construct($receipeInformationArray)
     {
         $this->ingredients = new ArrayCollection();
+        $this->analyzedInstructions = new ArrayCollection();
 
         $this->setId($receipeInformationArray['id']);
         $this->setTitle($receipeInformationArray['title']);
-        $this->setImage($receipeInformationArray['image']);
+        if(array_key_exists('image', $receipeInformationArray))
+        {
+            $this->setImage($receipeInformationArray['image']);
+        }
         $this->setServings($receipeInformationArray['servings']);
         $this->setReadyInMinutes($receipeInformationArray['readyInMinutes']);
         $this->setSourceUrl($receipeInformationArray['sourceUrl']);
@@ -44,6 +48,8 @@ class Receipe
             $ingredient = new Ingredient($extendedIngredient);
             $this->addIngredient($ingredient);
         }
+
+        $this->setSummary($receipeInformationArray['summary']);
     }
 
     /**
@@ -166,17 +172,15 @@ class Receipe
         return $this->analyzedInstructions;
     }
 
-    public function setAnalyzedInstructions($analyzedInstructionsArray)
+    public function setAnalyzedInstructions($analyzedInstructionsArray): void
     {
         if($analyzedInstructionsArray)
         {
             foreach ($analyzedInstructionsArray as $analyzedInstruction)
             {
-                $number = $analyzedInstruction['number'];
-                $this->analyzedInstructions[$number] = $analyzedInstruction['step'];
+                $this->analyzedInstructions->add($analyzedInstruction);
             }
         }
-        return $this;
     }
 
     /**
@@ -192,7 +196,7 @@ class Receipe
     {
         if(!$this->ingredients->contains($ingredient))
         {
-            $this->ingredients[] = $ingredient;
+            $this->ingredients->add($ingredient);
             $ingredient->setReceipe($this);
         }
     }
@@ -202,7 +206,7 @@ class Receipe
      */
     public function getSummary()
     {
-        return $this->title;
+        return $this->summary;
     }
 
     /**

@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Home{% endblock %}
+
+{% block body %}
+
+    {% include 'navbar/navbar.html.twig' %}
+
+    <ul>
+    {% for instruction in instructions %}
+        <li><h6>Step {{ instruction.number }}:</h6></li>
+        {{ instruction.step }}
+        <br><br>
+    {% endfor %}
+    </ul>
+{% endblock %}

@@ -23,8 +23,10 @@ class Ingredient
     {
         $this->setId($extendedIngredient['id']);
         $this->setName($extendedIngredient['name']);
-        $this->setAmount($extendedIngredient['measures']['metric']['amount']);
-        $this->setUnit($extendedIngredient['measures']['metric']['unitShort']);
+        $this->setAmount($extendedIngredient['amount']);
+        $this->setUnit($extendedIngredient['unit']);
+        $this->setRecalculatedAmount($extendedIngredient['measures']['metric']['amount']);
+        $this->setRecalculatedUnit($extendedIngredient['measures']['metric']['unitShort']);
         $this->recalculateAmountAndUnit($extendedIngredient['consistency']);
     }
 
@@ -108,13 +110,45 @@ class Ingredient
         $this->receipe = $receipe;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getRecalculatedUnit()
+    {
+        return $this->recalculatedUnit;
+    }
+
+    /**
+     * @param mixed $recalculatedUnit
+     */
+    public function setRecalculatedUnit($recalculatedUnit): void
+    {
+        $this->recalculatedUnit = $recalculatedUnit;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRecalculatedAmount()
+    {
+        return $this->recalculatedAmount;
+    }
+
+    /**
+     * @param mixed $recalculatedAmount
+     */
+    public function setRecalculatedAmount($recalculatedAmount): void
+    {
+        $this->recalculatedAmount = $recalculatedAmount;
+    }
+
+
+
     // if amount of ingredient is given as non-metric (tsp, tsps, Tbsp, Tbsps, oz, pinch, large, small, medium, servings, serving, small head, head)
     public function recalculateAmountAndUnit($consistency): void
     {
-        if($this->unit == 'g' || $this->unit == 'kg' || $this->unit == 'ml' || $this->unit == 'l' || $this->unit == '')
+        if($this->recalculatedUnit == 'g' || $this->recalculatedUnit == 'kg' || $this->recalculatedUnit == 'ml' || $this->recalculatedUnit == 'l' || $this->recalculatedUnit == '')
         {
-            $this->recalculatedAmount = $this->amount;
-            $this->recalculatedUnit = $this->unit;
         }
         else
         {

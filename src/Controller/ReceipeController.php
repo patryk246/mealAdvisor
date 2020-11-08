@@ -61,13 +61,16 @@ class ReceipeController extends AbstractController
     }
 
     /**
-     * @Route("/receipes/{receipeId}/steps", name="app_receipeSteps")
+     * @Route("/receipes/{receipeId}/instructions", name="app_receipeSteps")
      * @IsGranted("ROLE_USER")
      */
-    public function showReceipeSteps($receipeId)
+    public function showReceipeInstructions($receipeId)
     {
         $receipe = $this->session->get('receipe');
-        dump($receipe);
+        return $this->render('receipe/receipeInstructions.html.twig', [
+            'instructions' => $receipe->getAnalyzedInstructions(),
+            'email' => $this->getAuthenticatedUser()->getEmail()
+        ]);
     }
 
     private function getAuthenticatedUser()
