@@ -16,8 +16,6 @@ class Ingredient
     private $receipe;
     private $recalculatedUnit;
     private $recalculatedAmount;
-    // array useful with recalculating unit - if ingredient is liquid then recalculatedUnit will be ml, etc.
-    private $ingredientConsistency = ['liquid' => 'ml', 'solid' => 'g'];
 
     public function __construct($extendedIngredient)
     {
@@ -27,7 +25,6 @@ class Ingredient
         $this->setUnit($extendedIngredient['unit']);
         $this->setRecalculatedAmount($extendedIngredient['measures']['metric']['amount']);
         $this->setRecalculatedUnit($extendedIngredient['measures']['metric']['unitShort']);
-        $this->recalculateAmountAndUnit($extendedIngredient['consistency']);
     }
 
     /**
@@ -145,15 +142,11 @@ class Ingredient
 
 
     // if amount of ingredient is given as non-metric (tsp, tsps, Tbsp, Tbsps, oz, pinch, large, small, medium, servings, serving, small head, head)
-    public function recalculateAmountAndUnit($consistency): void
+    public function recalculateAmountAndUnit($targetUnit): void
     {
-        if($this->recalculatedUnit == 'g' || $this->recalculatedUnit == 'kg' || $this->recalculatedUnit == 'ml' || $this->recalculatedUnit == 'l' || $this->recalculatedUnit == '')
-        {
-        }
-        else
+        if($this->recalculatedUnit != $targetUnit)
         {
             $apiClient = new SpoonacularApiClient();
-            $targetUnit = $this->ingredientConsistency[$consistency];
             $convertedIngredient = $apiClient->convertAmounts($this->getName(), $this->getAmount(), $this->getUnit(), $targetUnit);
             $this->recalculatedAmount = $convertedIngredient['targetAmount'];
             $this->recalculatedUnit = $convertedIngredient['targetUnit'];

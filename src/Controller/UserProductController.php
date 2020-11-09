@@ -15,14 +15,17 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class UserProductController extends AbstractController
 {
     private $security;
+    private $session;
 
-    public function __construct(Security $security)
+    public function __construct(Security $security, SessionInterface $session)
     {
         $this->security = $security;
+        $this->session = $session;
     }
 
     /**
@@ -167,6 +170,31 @@ class UserProductController extends AbstractController
             'email' => $this->getAuthenticatedUser()->getEmail(),
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/products/recalculateAmountOfProducts", name="app_recalculateProducts")
+     * @IsGranted("ROLE_USER")
+     */
+    public function recalculateUserProducts(Request $request)
+    {
+        $recalcatedUserProducts = $this->session->get('recalculatedUserProducts');
+        $entityManager = $this->getDoctrine()->getManager();
+        foreach ($recalcatedUserProducts as $recalculatedUserProduct)
+        {
+            $userProduct = $entityManager->getRepository(UserProduct::class)->find($recalculatedUserProduct->getId());
+            if($recalculatedUserProduct->getAmount() == 0)
+            {
+                $entityManager->remove($userProduct);
+            }
+            else
+            {
+                $userProduct->setAmount($recalculatedUserProduct->getAmount());
+                $entityManager->persist($userProduct);
+                $entityManager->flush();
+            }
+        }
+        return $this->redirectToRoute("app_products");
     }
 
     private function getAuthenticatedUser()

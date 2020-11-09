@@ -13,4 +13,18 @@
         <br><br>
     {% endfor %}
     </ul>
+
+    {% if missedIngredients.count > 0 %}
+        <b>You can't make this meal because you haven't these products:</b>
+        <ul>
+        {% for missedIngredient in missedIngredients %}
+            <li>{{ missedIngredient.getName() }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <b>You have all needed products to prepare this meal. When you finish following the steps press button below.
+            This will reduce amount of your products by the used ingredients </b><br>
+        <a href="/products/recalculateAmountOfProducts" class="btn btn-success">Finish</a>
+    {% endif %}
+
 {% endblock %}

@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\ApiClient\SpoonacularApiClient;
 use App\Receipe\Receipe;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Routing\Annotation\Route;
@@ -50,9 +51,7 @@ class ReceipeController extends AbstractController
     {
         $apiClient = new SpoonacularApiClient();
         $receipeInformation = $apiClient->getReceipeInformation($receipeId);
-        dump($receipeInformation);
         $receipe = new Receipe($receipeInformation);
-        dump($receipe);
         $this->session->set('receipe', $receipe);
         return $this->render('receipe/showReceipe.html.twig', [
             'receipe' => $receipe,
@@ -67,9 +66,45 @@ class ReceipeController extends AbstractController
     public function showReceipeInstructions($receipeId)
     {
         $receipe = $this->session->get('receipe');
+        $ingredients = $receipe->getIngredients();
+        $user = $this->getAuthenticatedUser();
+        // collection contains objects UserProducts
+        $userProducts = $user->getUserProducts();
+        $missedIngredients = new ArrayCollection();
+        $recalculatedUserProducts = new ArrayCollection();
+        // checking if user have all required ingredients
+        foreach($ingredients as $ingredient)
+        {
+            $i = 0;
+            foreach ($userProducts as $userProduct)
+            {
+                if($ingredient->getName() == $userProduct->getProduct()->getName())
+                {
+                    $ingredient->recalculateAmountAndUnit($userProduct->getUnit()->getShortName());
+                    $newAmount = $userProduct->getAmount() - $ingredient->getRecalculatedAmount();
+                    if($newAmount < 0)
+                    {
+                        $missedIngredients->add($ingredient);
+                    }
+                    else {
+                        $userProduct->setAmount($newAmount);
+                        $recalculatedUserProducts->add($userProduct);
+                    }
+                    break;
+                }
+                $i++;
+            }
+            if($i == $userProducts->count())
+            {
+                $missedIngredients->add($ingredient);
+            }
+        }
+        dump($userProducts);
+        $this->session->set('recalculatedUserProducts', $recalculatedUserProducts);
         return $this->render('receipe/receipeInstructions.html.twig', [
             'instructions' => $receipe->getAnalyzedInstructions(),
-            'email' => $this->getAuthenticatedUser()->getEmail()
+            'email' => $this->getAuthenticatedUser()->getEmail(),
+            'missedIngredients' => $missedIngredients,
         ]);
     }
 
