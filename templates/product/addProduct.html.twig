@@ -6,14 +6,23 @@
 
     {% include 'navbar/navbar.html.twig' %}
 
-    <h4>Add new product to your collection</h4>
+    {% if "hidden" not in form.product.vars.block_prefixes %}
+        <h4>Add new product to your collection</h4>
+    {% else %}
+        <h4>Edit product</h4>
+    {% endif %}
     {{ form_start(form) }}
         <table>
             <thead></thead>
             <tbody>
                 <tr>
                     <td>{{ form_label(form.product) }}</td>
+                    {% if "hidden" not in form.product.vars.block_prefixes %}
                     <td>{{ form_widget(form.product) }}</td>
+                    {% else %}
+                    <td><fieldset style="border: 1px solid;"> {{ productName }} </fieldset>
+                    </td>
+                    {% endif %}
                     <td>{{ form_errors(form.product) }}</td>
                 </tr>
                 <tr>

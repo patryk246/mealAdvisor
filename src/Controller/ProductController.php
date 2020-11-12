@@ -52,30 +52,17 @@ class ProductController extends AbstractController
             }
             else
             {
-                return $this->render("authenticated/newProduct.html.twig", [
+                return $this->render("product/newProduct.html.twig", [
                     'form' => $form->createView(),
-                    'email' => $this->getAuthenticatedUser()->getEmail(),
                     'errorMessage' => 'Product with this name already exist',
                 ]);
             }
         }
 
-        return $this->render("/authenticated/newProduct.html.twig", [
+        return $this->render("/product/newProduct.html.twig", [
             'form' => $form->createView(),
-            'email' => $this->getAuthenticatedUser()->getEmail(),
             'errorMessage' => ''
         ]);
-    }
-
-    private function getAuthenticatedUser()
-    {
-        /** @var \src\Entity\User $user */
-        $user = $this->security->getUser();
-        if($user != null)
-        {
-            return $user;
-        }
-        throw new Exception('User is not signed in');
     }
 
 }

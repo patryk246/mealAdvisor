@@ -27,7 +27,11 @@ class MainController extends AbstractController
     */
     public function homePage(): Response
     {
-        return $this->render('authenticated/home.html.twig', ['email' => $this->getAuthenticatedUser()->getEmail()]);
+        $user = $this->getAuthenticatedUser();
+
+        return $this->render('authenticated/home.html.twig', [
+            'recentlyViewedReceipes' => $user->getUserViewedReceipes(),
+        ]);
     }
 
     private function getAuthenticatedUser()

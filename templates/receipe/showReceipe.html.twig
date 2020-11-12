@@ -32,7 +32,8 @@
                 <h5>Summary:</h5>
                 <h6>{{ receipe.getSummary() | raw }}</h6>
                 <br>
-                <a href="/receipes/{{ receipe.id }}/instructions" class="btn btn-success">See instructions</a>
+                <a href="/receipes/{{ receipe.getId() }}/instructions" class="btn btn-success">See instructions</a>
+                <a href="/receipes/addToFavourites/{{ userViewedReceipe.getId() }}" class="btn btn-success">Add to favourites</a>
             </div>
         </div>
     </div>

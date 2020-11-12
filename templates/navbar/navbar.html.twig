@@ -11,12 +11,18 @@
             <li class="nav-item">
                 <a class="nav-link" href="/products">Your Products</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/products/select">Find Receipes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/receipes/favourites">Favourite Receipes</a>
+            </li>
         </ul>
         {% if app.user %}
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
-                        {{ email }}
+                        {{ app.user.getEmail }}
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         <a class="dropdown-item" href="#">Your Profile</a>

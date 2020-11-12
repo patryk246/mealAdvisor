@@ -61,9 +61,17 @@ class User implements UserInterface
      */
     private $userProducts;
 
+    /**
+     * @ORM\OneToMany(targetEntity=UserViewedReceipe::class, mappedBy="user", orphanRemoval=true)
+     * @ORM\OrderBy({"lastView" = "DESC"})
+     */
+    private $userViewedReceipes;
+
     public function __construct()
     {
         $this->userProducts = new ArrayCollection();
+        $this->userViewedReceipes = new ArrayCollection();
+        $this->userFavouriteReceipes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -185,10 +193,6 @@ class User implements UserInterface
      */
     public function getUserProducts(): Collection
     {
-        // for some reasons without any action, method returns empty collection
-        // on this place dump($this->userProducts) shows empty array
-        $this->userProducts->count();
-        // on this place dump($this->userProducts) shows actual collection
         return $this->userProducts;
     }
 
@@ -202,7 +206,7 @@ class User implements UserInterface
                     throw new Exception('You already have this product!');
                 }
             }
-            $this->userProducts[] = $userProduct;
+            $this->userProducts->add($userProduct);
             $userProduct->setUser($this);
         }
         return $this;
@@ -218,6 +222,36 @@ class User implements UserInterface
         }
         else{
             throw new Exception('You can not delete product which you do not have!');
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|UserViewedReceipe[]
+     */
+    public function getUserViewedReceipes(): Collection
+    {
+        return $this->userViewedReceipes;
+    }
+
+    public function addUserViewedReceipe(UserViewedReceipe $userViewedReceipe): self
+    {
+        if (!$this->userViewedReceipes->contains($userViewedReceipe)) {
+            $this->userViewedReceipes[] = $userViewedReceipe;
+            $userViewedReceipe->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserViewedReceipe(UserViewedReceipe $userViewedReceipe): self
+    {
+        if ($this->userViewedReceipes->removeElement($userViewedReceipe)) {
+            // set the owning side to null (unless already changed)
+            if ($userViewedReceipe->getUserId() === $this) {
+                $userViewedReceipe->setUserId(null);
+            }
         }
 
         return $this;

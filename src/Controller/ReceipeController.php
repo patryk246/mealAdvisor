@@ -4,6 +4,9 @@
 namespace App\Controller;
 
 use App\ApiClient\SpoonacularApiClient;
+use App\Entity\ReceipeReference;
+use App\Entity\UserProduct;
+use App\Entity\UserViewedReceipe;
 use App\Receipe\Receipe;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,7 +42,6 @@ class ReceipeController extends AbstractController
         $response = $apiClient->getReceipesByIngredients($productNames);
         return $this->render("receipe/receipesSearchedById.html.twig", [
             'response' => $response,
-            'email' => $this->getAuthenticatedUser()->getEmail()
         ]);
     }
 
@@ -53,9 +55,40 @@ class ReceipeController extends AbstractController
         $receipeInformation = $apiClient->getReceipeInformation($receipeId);
         $receipe = new Receipe($receipeInformation);
         $this->session->set('receipe', $receipe);
+        //add receipe to recently viewed
+        $user = $this->getAuthenticatedUser();
+        $entityManager = $this->getDoctrine()->getManager();
+        $receipeReferenceFromDb = $entityManager->getRepository(ReceipeReference::class)->findOneBy(['receipeId' => $receipeId]);
+        if($receipeReferenceFromDb)
+        {
+            $userViewedReceipe = $entityManager->getRepository(UserViewedReceipe::class)->findOneBy([
+                'user' => $user,
+                'receipeReference' => $receipeReferenceFromDb,
+            ]);
+            if($userViewedReceipe)
+            {
+                $userViewedReceipe->setLastView(new \DateTime());
+                $entityManager->flush();
+            }
+            else
+            {
+                $userViewedReceipe = new UserViewedReceipe($user, $receipeReferenceFromDb);
+                $entityManager->persist($userViewedReceipe);
+                $entityManager->flush();
+            }
+        }
+        else
+        {
+            $receipeReference = new ReceipeReference($receipe->getTitle(), $receipe->getImage(), $receipe->getId());
+            $userViewedReceipe = new UserViewedReceipe($user, $receipeReference);
+            $entityManager->persist($receipeReference);
+            $entityManager->flush();
+            $entityManager->persist($userViewedReceipe);
+            $entityManager->flush();
+        }
         return $this->render('receipe/showReceipe.html.twig', [
             'receipe' => $receipe,
-            'email' => $this->getAuthenticatedUser()->getEmail()
+            'userViewedReceipe' => $userViewedReceipe,
         ]);
     }
 
@@ -68,7 +101,6 @@ class ReceipeController extends AbstractController
         $receipe = $this->session->get('receipe');
         $ingredients = $receipe->getIngredients();
         $user = $this->getAuthenticatedUser();
-        // collection contains objects UserProducts
         $userProducts = $user->getUserProducts();
         $missedIngredients = new ArrayCollection();
         $recalculatedUserProducts = new ArrayCollection();
@@ -99,12 +131,37 @@ class ReceipeController extends AbstractController
                 $missedIngredients->add($ingredient);
             }
         }
-        dump($userProducts);
         $this->session->set('recalculatedUserProducts', $recalculatedUserProducts);
         return $this->render('receipe/receipeInstructions.html.twig', [
             'instructions' => $receipe->getAnalyzedInstructions(),
-            'email' => $this->getAuthenticatedUser()->getEmail(),
             'missedIngredients' => $missedIngredients,
+        ]);
+    }
+
+    /**
+     * @Route("/receipes/addToFavourites/{userViewedReceipeId}", name="app_favouriteReceipes")
+     * @IsGranted("ROLE_USER")
+     */
+    public function addReceipeToFavourites($userViewedReceipeId)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $userViewedReceipe = $entityManager->getRepository(UserViewedReceipe::class)->find($userViewedReceipeId);
+        $userViewedReceipe->setIsFavourite(true);
+        $entityManager->persist($userViewedReceipe);
+        $entityManager->flush();
+        $this->redirectToRoute("app_showFavourites");
+    }
+
+    /**
+     * @Route("/receipes/favourites", name="app_showFavourites")
+     * @IsGranted("ROLE_USER")
+     */
+    public function showFavouriteReceipes()
+    {
+        $user = $this->getAuthenticatedUser();
+        $userViewedReceipes = $user->getUserViewedReceipes();
+        return $this->render('receipe/favouriteReceipes.html.twig', [
+            'userViewedReceipes' => $userViewedReceipes
         ]);
     }
 

@@ -32,17 +32,19 @@ class UserProductController extends AbstractController
      * @Route("/products", name="app_products")
      * @IsGranted("ROLE_USER")
      */
-    public function showUserProducts()
+    public function showUserProducts(Request $request)
     {
+        $errorMessage = '';
+        if($request->get('errorMessage'))
+        {
+            $errorMessage = $request->get('errorMessage');
+        }
         $user = $this->getAuthenticatedUser();
-        //$repository = $this->getDoctrine()->getRepository(UserProduct::class);
-        //$userProducts = $repository->findBy(['user' => $user->getId()]);
         $userProducts = $user->getUserProducts();
         dump($userProducts);
-        return $this->render('authenticated/showProducts.html.twig', [
-            'email' => $this->getAuthenticatedUser()->getEmail(),
+        return $this->render('product/showProducts.html.twig', [
             'userProducts' => $userProducts,
-            'errorMessage' => ''
+            'errorMessage' => $errorMessage
         ]);
     }
 
@@ -63,9 +65,8 @@ class UserProductController extends AbstractController
                 $user->addUserProduct($userProduct);
             }
             catch (Exception $exception){
-                return $this->render('authenticated/addProduct.html.twig', [
+                return $this->render('product/addProduct.html.twig', [
                     'form' => $form->createView(),
-                    'email' => $this->getAuthenticatedUser()->getEmail(),
                     'errorMessage' => $exception->getMessage(),
                 ]);
             }
@@ -74,10 +75,10 @@ class UserProductController extends AbstractController
             $entityManager->flush();
             return $this->redirectToRoute('app_products');
         }
-        return $this->render('authenticated/addProduct.html.twig', [
+        return $this->render('product/addProduct.html.twig', [
             'form' => $form->createView(),
-            'email' => $this->getAuthenticatedUser()->getEmail(),
             'errorMessage' => '',
+            'productName' => '',
         ]);
     }
 
@@ -91,23 +92,22 @@ class UserProductController extends AbstractController
         $userProduct = $entityManager->getRepository(UserProduct::class)->find($userProductId);
         if(!$userProduct)
         {
-            throw $this->createNotFoundException('There is no such product');
+            return $this->redirectToRoute('app_products',
+                [
+                    'errorMessage' => 'You can not edit product which you do not have!'
+                ]);
         }
-
         $form = $this->createForm(UserProductFormType::class, $userProduct);
-
         $form -> handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $userProduct = $form->getData();
             $entityManager->flush();
-
             return $this->redirectToRoute('app_products');
         }
-
-        return $this->render('authenticated/addProduct.html.twig', [
+        return $this->render('product/addProduct.html.twig', [
             'form' => $form->createView(),
-            'email' => $this->getAuthenticatedUser()->getEmail(),
             'errorMessage' => '',
+            'productName' => $userProduct->getProduct()->getName(),
         ]);
     }
 
@@ -151,23 +151,20 @@ class UserProductController extends AbstractController
         {
             $products->add($userProduct->getProduct());
         }
-
         $form = $this->createForm(SelectProductsFormType::class, $product, ['products' => $products]);
-
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid())
         {
-            //dump($form['name']->getData());
             $productNames = '';
             foreach ($form['name']->getData() as $selectedProduct)
             {
+                //create string used in API call as parameter
                 $productNames .= $selectedProduct->getName() . ',';
             }
             $productNames = substr($productNames, 0, -1);
             return $this->redirectToRoute('app_findReceipes', ['productNames' => $productNames]);
         }
         return $this->render('product/selectProducts.html.twig', [
-            'email' => $this->getAuthenticatedUser()->getEmail(),
             'form' => $form->createView(),
         ]);
     }
